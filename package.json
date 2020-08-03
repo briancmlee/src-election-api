@@ -1,0 +1,13 @@
+{
+  "name": "src-election-api",
+  "version": "1.0.0",
+  "description": "Serverless CRUD service exposing a REST HTTP interface",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.19"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.723.0"
+  }
+}

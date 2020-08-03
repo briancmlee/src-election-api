@@ -1,0 +1,96 @@
+service: src-election-api
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  region: ap-southeast-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+functions:
+  create:
+    handler: elections/create.create
+    events:
+      - http:
+          path: elections
+          method: post
+          cors: true
+
+  list:
+    handler: elections/list.list
+    events:
+      - http:
+          path: elections
+          method: get
+          cors: true
+
+  get:
+    handler: elections/get.get
+    events:
+      - http:
+          path: elections/{id}
+          method: get
+          cors: true
+
+  update:
+    handler: elections/update.update
+    events:
+      - http:
+          path: elections/{id}
+          method: put
+          cors: true
+
+  delete:
+    handler: elections/delete.delete
+    events:
+      - http:
+          path: elections/{id}
+          method: delete
+          cors: true
+  
+  vote:
+    handler: elections/vote.vote
+    events:
+      - http:
+          path: elections/{id}/vote
+          method: post
+          cors: true
+  
+  calculate:
+    handler: elections/calculate.calculate
+    events:
+      - http:
+          path: elections/{id}/calculate
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    ElectionsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
